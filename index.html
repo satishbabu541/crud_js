@@ -7,121 +7,7 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"
   integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
   crossorigin="anonymous"></script>
-  <script type="text/javascript">
-
-$( document ).ready(function() {
-// the json data. (you can change the values for output.)
-fetch('https://jsonplaceholder.typicode.com/users')
-  .then((response) => {
-        if (response.status !== 200) {
-            console.log('Looks like there was a problem. Status Code: ' + response.status);
-            return;
-        }
-        response.json().then((users) => {
-           var col = [];
-        for (var i = 0; i < users.length; i++) {
-            for (var key in users[i]) {
-                if (col.indexOf(key) === -1) {
-                    col.push(key);
-                }
-            }
-        }
-       // col.unshift("Select");
-
-        // CREATE DYNAMIC TABLE.
-        var table = document.createElement("table");
-
-        // CREATE HTML TABLE HEADER ROW USING THE EXTRACTED HEADERS ABOVE.
-
-        var tr = table.insertRow(-1);                   // TABLE ROW.
-
-        for (var i = 0; i < col.length; i++) {
-            var th = document.createElement("th");      // TABLE HEADER.
-            //th.innerHTML = "Select"
-            th.innerHTML = col[i];
-            tr.appendChild(th);
-        }
-
-        // ADD JSON DATA TO THE TABLE AS ROWS.
-        for (var i = 0; i < users.length; i++) {
-
-            tr = table.insertRow(-1);
-              var chk = document.createElement('input');
-              chk.setAttribute('type', 'checkbox');
-               chk.setAttribute('class', 'checkboxCls');
-              chk.setAttribute('name', 'locationthemes');
-              chk.setAttribute('value',users[i].id );
-             // chk.setAttribute('id', 'chkIfSenior' + i);
-              tr.appendChild(chk);
-            for (var j = 0; j < col.length; j++) {
-                var tabCell = tr.insertCell(-1);
-                //if(j==0){tabCell.innerHTML ="";}
-                tabCell.innerHTML = users[i][col[j]];
-            }
-
-        }
-
-
-        // FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
-        var divContainer = document.getElementById("showData");
-        divContainer.innerHTML = "";
-        divContainer.appendChild(table);
-            // populate table with a minimum of 2 repos and save remainder into selection dropdown
-        });
-    }).catch((err) => {
-        console.log('Fetch Error :-S', err);
-    });
-    
-
-     
-    });
-
-
-      function openForm() {
-        document.getElementById("popupForm").style.display = "block";
-      }
-      function closeForm() {
-        document.getElementById("popupForm").style.display = "none";
-      }
-      function saveuser(){
-        var username = $("#username").val();
-        var email = $("#email").val();
-
-    fetch('https://jsonplaceholder.typicode.com/users', {
-  method: 'POST',
-  body: JSON.stringify({
-    username: username,
-    email:email
-    // name:"",
-    // address:"",
-    // phone:"",
-    // website:"",
-    // company:""
-   
-  }),
-  headers: {
-    'Content-type': 'application/json; charset=UTF-8',
-  },
-})
-  .then((response) => response.json())
-  .then((json) => console.log(json))  
-      }
-      function editUser(){
-
-      }
-      function deleteUsers(){
-
-$('input[name="locationthemes"]:checked').each(function() {
-  var checkedVal =this.value 
-  fetch('https://jsonplaceholder.typicode.com/users/'+checkedVal, {
-  method: 'DELETE',
-}) .then((response) => response.json())
-  .then((json) => console.log(json)) 
  
-});
-
-      }
-  </script>
 </head>
 <body>
 
@@ -135,6 +21,10 @@ $('input[name="locationthemes"]:checked').each(function() {
       <div class="formPopup" id="popupForm">
         <form class="formContainer">
           <h2>Add User here</h2>
+          <label for="name">
+            <strong>name</strong>
+          </label>
+          <input type="text" id="name" name="name" required>
            <label for="psw">
             <strong>username</strong>
           </label>
@@ -165,5 +55,137 @@ $('input[name="locationthemes"]:checked').each(function() {
  
  
 </div>
+ <script type="text/javascript">
+$(document).ready(function() {
+    // the json data. (you can change the values for output.)
+    fetch('https://jsonplaceholder.typicode.com/users')
+        .then((response) => {
+            if (response.status !== 200) {
+                console.log('Looks like there was a problem. Status Code: ' + response.status);
+                return;
+            }
+            response.json().then((users) => {
+                var tableHtml = '<table><tr><th><input type="checkbox" id="ckbCheckAll" name="selectall" value=""></th><th>id</th><th>name</th><th>username</th><th>email</th></tr>';
+                for (var i = 0; i < users.length; i++) {
+                    tableHtml += '<tr><td><input type="checkbox" class="checkBoxClass" name="locationthemes" id="eachcheckbox" value="' + users[i].id + '"</td><td>' + users[i].id + '</td><td>' + users[i].name + '</td><td>' + users[i].username + '</td><td>' + users[i].email + '</td></tr>';
+                }
+                tableHtml += '<table>';
+
+
+                // FINALLY ADD THE NEWLY CREATED TABLE WITH JSON DATA TO A CONTAINER.
+                var divContainer = document.getElementById("showData");
+                divContainer.innerHTML = "";
+                divContainer.innerHTML = tableHtml;
+
+                // For select all check boxes
+                $("#ckbCheckAll").click(function() {
+                    $(".checkBoxClass").prop('checked', $(this).prop('checked'));
+                });
+
+                // enable disable Button Edit
+                $('input:checkbox').click(function() {
+                    if ($(this).is(':checked')) {
+                        $('#editUser').prop("disabled", false);
+                    } else {
+                        if ($('.checkBoxClass').filter(':checked').length < 1) {
+                            $('#editUser').attr('disabled', true);
+                        }
+                    }
+                });
+                // populate table with a minimum of 2 repos and save remainder into selection dropdown
+            });
+        }).catch((err) => {
+            console.log('Fetch Error :-S', err);
+        });
+
+
+});
+
+function saveuser() {
+    var username = $("#username").val();
+    var email = $("#email").val();
+     var name = $("#name").val();
+
+    fetch('https://jsonplaceholder.typicode.com/users', {
+            method: 'POST',
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                 name:name
+              }),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
+        })
+        .then((response) => response.json())
+        .then((json) => console.log(json))
+}
+function editUser() {
+    var id = $('#eachcheckbox').val();
+    fetch('https://jsonplaceholder.typicode.com/users')
+        .then((response) => {
+            if (response.status !== 200) {
+                console.log('Looks like there was a problem. Status Code: ' + response.status);
+                return;
+            }
+            response.json().then((users) => {
+                for (var i = 0; i < users.length; i++) {
+                    $("#username").val(users[i].username);
+                    $("#email").val(users[i].email);
+                    $("#name").val(users[i].name);
+                }
+                document.getElementById("popupForm").style.display = "block";
+            });
+            var username = $("#username").val();
+            var email = $("#email").val();
+            var name = $("#name").val();
+            if (username != "" && email != "" && name != "") {
+
+                fetch('https://jsonplaceholder.typicode.com/users/' + id, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            username: username,
+                            email: email,
+                            name: name
+                        }),
+                        headers: {
+                            'Content-type': 'application/json; charset=UTF-8',
+                        },
+                    })
+                    .then((response) => response.json())
+                    .then((json) => console.log(json))
+
+            } else {
+                // alert("fields should not empty");
+            }
+
+
+        });
+
+}
+function deleteUsers() {
+
+    $('input[name="locationthemes"]:checked').each(function() {
+        var checkedVal = this.value
+        fetch('https://jsonplaceholder.typicode.com/users/' + checkedVal, {
+                method: 'DELETE',
+            }).then((response) => response.json())
+            .then((json) => console.log(json))
+
+    });
+
+}
+
+function openForm() {
+    document.getElementById("popupForm").style.display = "block";
+}
+
+function closeForm() {
+    document.getElementById("popupForm").style.display = "none";
+    $("#username").val("");
+    $("#email").val("");
+     $("#name").val("");
+}
+  </script>
 </body>
 </html>
